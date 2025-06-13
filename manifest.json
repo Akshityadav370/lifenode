@@ -1,0 +1,8 @@
+{
+  "manifest_version": 3,
+  "name": "LifeNode",
+  "description": "Your all-in-one life assistant on every new tab.",
+  "version": "1.0.0",
+  "action": { "default_popup": "index.html", "default_title": "LifeNode" },
+  "host_permissions": ["http://localhost:5173/"]
+}
