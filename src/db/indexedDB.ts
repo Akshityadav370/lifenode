@@ -1,5 +1,5 @@
 import { DBSchema, openDB } from 'idb';
-import { Habit, HabitCompletion, Reminder, Task } from './data.types';
+import { Habit, HabitCompletion, Reminder, Task } from './data-types';
 
 interface LifeNodeDB extends DBSchema {
   habits: {

@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
 import './App.css';
 import {
   Card,
@@ -10,45 +8,42 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Settings } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   return (
-    <main className="">
-      <Card>
-        <CardHeader>
-          <CardTitle>Card Title</CardTitle>
-          <CardDescription>Card Description</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p>Card Content</p>
-        </CardContent>
-        <CardFooter>
-          <p>Card Footer</p>
-        </CardFooter>
-      </Card>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card bg-red-500">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </main>
+    <div className="bg-yellow-300 w-auto p-2">
+      <header className="w-full flex items-center bg-red-400 justify-between">
+        <div className="">
+          <h2>LifeNode</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <div>
+            <p>Buy me coffee</p>
+          </div>
+          <Settings />
+        </div>
+      </header>
+      <main>
+        <Tabs defaultValue="account" className="">
+          <TabsList className="gap-10">
+            <TabsTrigger value="account" className="w-32">
+              Account
+            </TabsTrigger>
+            <TabsTrigger value="password" className="w-32">
+              Password
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="account">
+            Make changes to your account here.
+          </TabsContent>
+          <TabsContent value="password">Change your password here.</TabsContent>
+        </Tabs>
+      </main>
+    </div>
   );
 }
 

@@ -1,5 +1,6 @@
 export type HabitFrequency = 'daily' | 'weekly' | 'monthly';
 export type ReminderFrequency = 'hourly' | 'custom' | 'daily' | 'weekly';
+export type TabType = 'habits' | 'todos' | 'reminders' | 'dashboard';
 
 export interface Habit {
   id: number;
