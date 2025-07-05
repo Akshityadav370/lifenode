@@ -16,6 +16,8 @@ interface LifeNodeDB extends DBSchema {
       habitId: number;
       date: string;
       habitId_date: [number, string];
+      month: string;
+      habitId_month: [number, string];
     };
   };
   reminders: {
@@ -53,6 +55,8 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
       habitCompletionsStore.createIndex('habitId', 'habitId'); // all completions of a habit
       habitCompletionsStore.createIndex('date', 'date'); // all completions on a date
       habitCompletionsStore.createIndex('habitId_date', ['habitId', 'date']); // lookup specific day's status for a habit
+      habitCompletionsStore.createIndex('month', 'month'); // all completions of month
+      habitCompletionsStore.createIndex('habitId_month', ['habitId', 'month']); // all completions of habitId for 'month'
     }
     if (!db.objectStoreNames.contains('reminders')) {
       const reminderStore = db.createObjectStore('reminders', {

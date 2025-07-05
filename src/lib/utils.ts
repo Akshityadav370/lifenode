@@ -1,6 +1,125 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
+
+export const colorPalettes = {
+  ocean: {
+    name: 'Ocean',
+    light: {
+      primary: '#0EA5E9',
+      secondary: '#06B6D4',
+      accent: '#3B82F6',
+      background: '#F8FAFC',
+      surface: '#FFFFFF',
+      text: '#1E293B',
+      textMuted: '#64748B',
+      border: '#E2E8F0',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+    dark: {
+      primary: '#0EA5E9',
+      secondary: '#06B6D4',
+      accent: '#3B82F6',
+      background: '#0F172A',
+      surface: '#1E293B',
+      text: '#F1F5F9',
+      textMuted: '#94A3B8',
+      border: '#334155',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+  },
+  forest: {
+    name: 'Forest',
+    light: {
+      primary: '#059669',
+      secondary: '#10B981',
+      accent: '#34D399',
+      background: '#F0FDF4',
+      surface: '#FFFFFF',
+      text: '#1F2937',
+      textMuted: '#6B7280',
+      border: '#D1D5DB',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+    dark: {
+      primary: '#059669',
+      secondary: '#10B981',
+      accent: '#34D399',
+      background: '#0F1A14',
+      surface: '#1F2937',
+      text: '#F9FAFB',
+      textMuted: '#9CA3AF',
+      border: '#374151',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+  },
+  sunset: {
+    name: 'Sunset',
+    light: {
+      primary: '#F59E0B',
+      secondary: '#EF4444',
+      accent: '#EC4899',
+      background: '#FFFBEB',
+      surface: '#FFFFFF',
+      text: '#1F2937',
+      textMuted: '#6B7280',
+      border: '#E5E7EB',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+    dark: {
+      primary: '#F59E0B',
+      secondary: '#EF4444',
+      accent: '#EC4899',
+      background: '#1A1412',
+      surface: '#292524',
+      text: '#FAFAF9',
+      textMuted: '#A8A29E',
+      border: '#44403C',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+  },
+  purple: {
+    name: 'Purple',
+    light: {
+      primary: '#7C3AED',
+      secondary: '#A855F7',
+      accent: '#C084FC',
+      background: '#FAFAFA',
+      surface: '#FFFFFF',
+      text: '#1F2937',
+      textMuted: '#6B7280',
+      border: '#E5E7EB',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+    dark: {
+      primary: '#7C3AED',
+      secondary: '#A855F7',
+      accent: '#C084FC',
+      background: '#1A1625',
+      surface: '#2D1B69',
+      text: '#F9FAFB',
+      textMuted: '#9CA3AF',
+      border: '#4C1D95',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+    },
+  },
+};

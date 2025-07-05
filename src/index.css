@@ -29,8 +29,6 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  /* min-width: 320px; */
-  min-height: 100vh;
 }
 
 h1 {
@@ -133,4 +131,13 @@ button:focus-visible {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.my-button {
+  background-color: var(--surface);
+  transition: background-color 0.2s;
+}
+
+.my-button:hover {
+  background-color: var(--primary);
 }

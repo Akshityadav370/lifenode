@@ -7,14 +7,15 @@ export interface Habit {
   name: string;
   frequency: HabitFrequency;
   streak: number;
-  lastCompleted: string; // Format: "YYYY-MM-DD"
-  createdAt: string; // Format: "YYYY-MM"
+  lastCompleted?: string; // Format: "YYYY-MM-DD"
+  createdAt: string; // Format: "YYYY-MM-DD"
 }
 
 export interface HabitCompletion {
   id: number;
   habitId: number;
   date: string; // Format: "YYYY-MM-DD"
+  month: string; // Format: "YYYY-MM"
   completed: boolean;
 }
 
