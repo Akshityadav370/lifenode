@@ -30,7 +30,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const Streaks = () => {
-  const [currentMonth, setCurrentMonth] = useState('2024-03');
+  const [currentMonth, setCurrentMonth] = useState(
+    format(new Date(), 'yyyy-MM')
+  );
   const [newHabitName, setNewHabitName] = useState('');
   const [selectedFrequency, setSelectedFrequency] = useState<
     HabitFrequency | undefined
@@ -212,7 +214,7 @@ const Streaks = () => {
                 {daysInMonth.map((date) => (
                   <th
                     key={date.date}
-                    className="w-5 min-w-5 px-0 py-3 text-center text-xs font-medium"
+                    className="w-5 min-w-5 px-0 py-3 text-center text-xs font-semibold"
                     style={{ color: 'var(--text)' }}
                   >
                     <div className="flex flex-col items-center gap-3">

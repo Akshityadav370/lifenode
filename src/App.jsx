@@ -41,7 +41,7 @@ function App() {
   const TabButton = ({ value, children, isActive }) => (
     <button
       onClick={() => setActiveTab(value)}
-      className={`flex-1 py-2 px-4 text-sm font-medium rounded-lg transition-all ${
+      className={`flex-1 py-2 px-4 text-sm font-semibold rounded-lg transition-all ${
         isActive ? 'text-white' : ''
       }`}
       style={{
@@ -74,7 +74,7 @@ function App() {
               LifeNode
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div
               className="my-button flex items-center gap-2 px-2 py-1 rounded-lg text-xs cursor-pointer"
               style={{

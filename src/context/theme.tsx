@@ -16,6 +16,7 @@ const ThemeContext = ({ children, theme }) => {
     backgroundColor: colors.background,
     color: colors.text,
     minHeight: '100vh',
+    fontFamily: "'Livvic', sans-serif",
   };
 
   return (
