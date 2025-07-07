@@ -7,6 +7,7 @@ interface LifeNodeDB extends DBSchema {
     value: Habit;
     indexes: {
       createdAt: string;
+      month: string;
     };
   };
   habitCompletions: {
@@ -44,7 +45,8 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
         autoIncrement: true,
       });
 
-      habitStore.createIndex('createdAt', 'createdAt'); // fetch habits by month
+      habitStore.createIndex('createdAt', 'createdAt'); // fetch habits by id
+      habitStore.createIndex('month', 'month'); // fetch habits by month
     }
     if (!db.objectStoreNames.contains('habitCompletions')) {
       const habitCompletionsStore = db.createObjectStore('habitCompletions', {

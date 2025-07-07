@@ -96,65 +96,6 @@ export const useMonthlyHabits = (month: string) => {
   const [habits, setHabits] = useState<
     Array<Habit & { completions: Record<string, HabitCompletion> }>
   >([]);
-  // const [habits, setHabits] = useState<
-  //   Array<Habit & { completions: Record<string, HabitCompletion> }>
-  // >([
-  //   {
-  //     id: 1,
-  //     name: 'Exercise',
-  //     frequency: 'daily',
-  //     streak: 5,
-  //     createdAt: '2024-03-01',
-  //     completions: {
-  //       '2024-03-01': {
-  //         id: 1,
-  //         habitId: 1,
-  //         date: '2024-03-01',
-  //         month: '2024-03',
-  //         completed: true,
-  //       },
-  //       '2024-03-02': {
-  //         id: 2,
-  //         habitId: 1,
-  //         date: '2024-03-02',
-  //         month: '2024-03',
-  //         completed: false,
-  //       },
-  //     },
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Read Book',
-  //     frequency: 'daily',
-  //     streak: 3,
-  //     createdAt: '2024-03-01',
-  //     completions: {
-  //       '2024-03-01': {
-  //         id: 5,
-  //         habitId: 2,
-  //         date: '2024-03-01',
-  //         completed: true,
-  //         month: '2024-03',
-  //       },
-  //     },
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'Meditate',
-  //     frequency: 'daily',
-  //     streak: 2,
-  //     createdAt: '2024-03-01',
-  //     completions: {
-  //       '2024-03-02': {
-  //         id: 8,
-  //         habitId: 3,
-  //         date: '2024-03-02',
-  //         month: '2024-03',
-  //         completed: true,
-  //       },
-  //     },
-  //   },
-  // ]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -163,8 +104,9 @@ export const useMonthlyHabits = (month: string) => {
     try {
       setLoading(true);
       setError(null);
-      //   const monthlyHabits = await HabitService.getHabitsForMonth(month);
-      //   setHabits(monthlyHabits);
+      const monthlyHabits = await HabitService.getHabitsForMonth(month);
+      // console.log('monthly habits', monthlyHabits);
+      setHabits(monthlyHabits);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to load monthly habits'
@@ -177,7 +119,7 @@ export const useMonthlyHabits = (month: string) => {
   const toggleHabitCompletion = useCallback(
     async (habitId: number, date: string) => {
       try {
-        const updatedCompletion = await HabitService.toggleHabitCompletion(
+        const res = await HabitService.toggleHabitCompletion(
           habitId,
           date,
           month
@@ -189,9 +131,10 @@ export const useMonthlyHabits = (month: string) => {
             habit.id === habitId
               ? {
                   ...habit,
+                  streak: res.updatedStreak,
                   completions: {
                     ...habit.completions,
-                    [date]: updatedCompletion,
+                    [date]: res.updatedCompletion,
                   },
                 }
               : habit
@@ -213,6 +156,7 @@ export const useMonthlyHabits = (month: string) => {
     async (habitData: {
       name: string;
       frequency: 'daily' | 'weekly' | 'monthly';
+      month: string;
     }) => {
       try {
         const newHabit = await HabitService.createHabit(habitData);
@@ -265,13 +209,14 @@ export const useMonthlyHabits = (month: string) => {
         total: habits.length,
       };
     }
-
+    // console.log('monthStats', monthStats);
     return monthStats;
   }, [habits, month]);
 
   useEffect(() => {
     loadMonthlyHabits();
-  }, [loadMonthlyHabits]);
+    getMonthStats();
+  }, [month]);
 
   return {
     habits,
@@ -283,5 +228,46 @@ export const useMonthlyHabits = (month: string) => {
     deleteHabit,
     getCompletionStatus,
     getMonthStats,
+  };
+};
+
+// ==================== MONTH'S LONGEST STREAKS ====================
+export const useMonthlyHabitsWithStreaks = (month: string) => {
+  const [habitsWithStreaks, setHabitsWithStreaks] = useState<
+    Array<{
+      habitData: Habit & { completions: Record<string, HabitCompletion> };
+      currentStreak: number;
+      longestStreak: number;
+    }>
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadMonthlyHabitsWithStreaks = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const habits = await HabitService.getHabitsForMonthWithStreaks(month);
+      setHabitsWithStreaks(habits);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to load monthly habits with streaks'
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [month]);
+
+  useEffect(() => {
+    loadMonthlyHabitsWithStreaks();
+  }, [loadMonthlyHabitsWithStreaks]);
+
+  return {
+    habitsWithStreaks,
+    loading,
+    error,
+    loadMonthlyHabitsWithStreaks,
   };
 };

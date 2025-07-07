@@ -83,10 +83,19 @@ export class HabitService {
     month: string
   ): Promise<HabitCompletion[]> {
     const db = await dbPromise;
-    return await db.getAllFromIndex('habitCompletions', 'habitId_month', [
-      habitId,
-      month,
-    ]);
+    // console.log('getHabitCompletions for month', habitId, month);
+
+    try {
+      const completions = await db.getAllFromIndex(
+        'habitCompletions',
+        'habitId_month',
+        [habitId, month]
+      );
+      return completions;
+    } catch (error) {
+      console.error('Error fetching habit completions:', error);
+      return [];
+    }
   }
 
   /**
@@ -96,15 +105,17 @@ export class HabitService {
     month: string
   ): Promise<Array<Habit & { completions: Record<string, HabitCompletion> }>> {
     const db = await dbPromise;
-    const habits = await db.getAll('habits');
+    const habits = await db.getAllFromIndex('habits', 'month', month);
+    // console.log('habits', habits);
 
     const habitsWithCompletions = await Promise.all(
       habits.map(async (habit) => {
+        // console.log('habit', habit, month);
         const completions = await this.getHabitCompletionsForMonth(
           habit.id,
           month
         );
-
+        // console.log('completions', completions);
         const completionsRecord: Record<string, HabitCompletion> = {};
         completions.forEach((completion) => {
           completionsRecord[completion.date] = completion;
@@ -118,13 +129,90 @@ export class HabitService {
   }
 
   /**
+   * Get all habits with their current and longest streaks
+   */
+  static async getAllHabitsWithStreaks(): Promise<
+    Array<{
+      habitData: Habit;
+      currentStreak: number;
+      longestStreak: number;
+    }>
+  > {
+    const db = await dbPromise;
+    const habits = await db.getAll('habits');
+
+    const habitsWithStreaks = await Promise.all(
+      habits.map(async (habit) => {
+        const completions = await this.getHabitCompletions(habit.id);
+        const longestStreak = this.calculateLongestStreak(
+          completions,
+          habit.frequency
+        );
+        return {
+          habitData: habit,
+          currentStreak: habit.streak,
+          longestStreak: longestStreak,
+        };
+      })
+    );
+
+    return habitsWithStreaks;
+  }
+
+  /**
+   * Get habits for a specific month with their current and longest streaks
+   */
+  static async getHabitsForMonthWithStreaks(month: string): Promise<
+    Array<{
+      habitData: Habit & { completions: Record<string, HabitCompletion> };
+      currentStreak: number;
+      longestStreak: number;
+    }>
+  > {
+    try {
+      const db = await dbPromise;
+      const habits = await db.getAllFromIndex('habits', 'month', month);
+
+      const habitsWithStreaks = await Promise.all(
+        habits.map(async (habit) => {
+          const completions = await this.getHabitCompletionsForMonth(
+            habit.id,
+            month
+          );
+          const completionsRecord: Record<string, HabitCompletion> = {};
+          completions.forEach((completion) => {
+            completionsRecord[completion.date] = completion;
+          });
+
+          const allCompletions = await this.getHabitCompletions(habit.id);
+          const longestStreak = this.calculateLongestStreak(
+            allCompletions,
+            habit.frequency
+          );
+
+          return {
+            habitData: { ...habit, completions: completionsRecord },
+            currentStreak: habit.streak,
+            longestStreak: longestStreak,
+          };
+        })
+      );
+
+      return habitsWithStreaks;
+    } catch (error) {
+      console.error('Error fetching habit for the month streaks:', error);
+      return [];
+    }
+  }
+
+  /**
    * Toggle habit completion for a specific date and return updated completion record
    */
   static async toggleHabitCompletion(
     habitId: number,
     date: string,
     month: string
-  ): Promise<HabitCompletion> {
+  ): Promise<{ updatedCompletion: HabitCompletion; updatedStreak: number }> {
     const db = await dbPromise;
 
     const existing = await db.getFromIndex('habitCompletions', 'habitId_date', [
@@ -151,9 +239,9 @@ export class HabitService {
       updatedCompletion = { ...newCompletion, id } as HabitCompletion;
     }
 
-    await this.updateHabitStreak(habitId, date);
+    const updatedStreak = await this.updateHabitStreak(habitId, date);
 
-    return updatedCompletion;
+    return { updatedCompletion, updatedStreak };
   }
 
   // ==================== STREAK CALCULATION ====================
@@ -164,7 +252,7 @@ export class HabitService {
   private static async updateHabitStreak(
     habitId: number,
     fromDate: string
-  ): Promise<void> {
+  ): Promise<number> {
     const db = await dbPromise;
 
     const habit = await db.get('habits', habitId);
@@ -178,6 +266,8 @@ export class HabitService {
       streak,
       lastCompleted: fromDate,
     });
+
+    return streak;
   }
 
   /**

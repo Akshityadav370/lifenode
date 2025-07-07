@@ -1,9 +1,13 @@
-import { useMonthlyHabits } from '@/hooks/useHabits';
+import {
+  useMonthlyHabits,
+  useMonthlyHabitsWithStreaks,
+} from '@/hooks/useHabits';
 import { eachDayOfInterval, endOfMonth, format, parse } from 'date-fns';
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Flame,
   Plus,
   Trash2,
 } from 'lucide-react';
@@ -17,14 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HabitFrequency } from '@/db/data-types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -47,7 +44,12 @@ const Streaks = () => {
     getCompletionStatus,
   } = useMonthlyHabits(currentMonth);
 
-  console.log('habits', habits);
+  const {
+    habitsWithStreaks,
+    loading: loadingMonthlyDash,
+    error: errorMontlyDash,
+    loadMonthlyHabitsWithStreaks,
+  } = useMonthlyHabitsWithStreaks(currentMonth);
 
   const generateDaysInMonth = (month: string) => {
     const start = parse(month, 'yyyy-MM', new Date());
@@ -62,7 +64,6 @@ const Streaks = () => {
   };
 
   const daysInMonth = generateDaysInMonth(currentMonth);
-  console.log('daysInMonth', daysInMonth);
 
   const navigateMonth = (direction) => {
     const [year, month] = currentMonth.split('-').map(Number);
@@ -85,11 +86,12 @@ const Streaks = () => {
       createHabit({
         name: newHabitName.trim(),
         frequency: selectedFrequency,
+        month: currentMonth,
       });
       setNewHabitName('');
-      setSelectedFrequency(undefined);
     }
   };
+  console.log(habitsWithStreaks);
 
   const formatMonthYear = (month) => {
     const [year, monthNum] = month.split('-');
@@ -110,6 +112,10 @@ const Streaks = () => {
     return `${monthNames[parseInt(monthNum) - 1]} ${year}`;
   };
 
+  useEffect(() => {
+    loadMonthlyHabitsWithStreaks();
+  }, [habits]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">Loading...</div>
@@ -129,11 +135,13 @@ const Streaks = () => {
             <ChevronLeft size={16} style={{ color: 'var(--text)' }} />
           </button>
 
-          <h1 className="text-base font-bold flex items-center gap-2">
-            <Calendar size={16} style={{ color: 'var(--primary)' }} />
-            <span style={{ color: 'var(--text)' }}>
-              {formatMonthYear(currentMonth)}
-            </span>
+          <h1 className="text-base min-w-36 font-bold">
+            <div className="flex flex-1 items-center gap-2 justify-center">
+              <Calendar size={16} style={{ color: 'var(--primary)' }} />
+              <span className="text-center" style={{ color: 'var(--text)' }}>
+                {formatMonthYear(currentMonth)}
+              </span>
+            </div>
           </h1>
 
           <button
@@ -143,6 +151,40 @@ const Streaks = () => {
           >
             <ChevronRight size={16} style={{ color: 'var(--text)' }} />
           </button>
+        </div>
+        <div className="flex-1 mx-2 overflow-scroll mask-fade-right pr-16 hide-scrollbar">
+          <div className="flex w-fit gap-2">
+            {habitsWithStreaks.map((habitStreak) => (
+              <div
+                key={habitStreak.habitData.id}
+                className="flex gap-4 p-1 px-2 items-center rounded-lg shadow border"
+                style={{
+                  borderColor: 'var(--accent)',
+                  backgroundColor: 'var(--surface)',
+                }}
+              >
+                <span>{habitStreak.habitData.name}</span>
+                <div className="flex items-baseline gap-1">
+                  <span>
+                    {habitStreak.currentStreak !== 0
+                      ? habitStreak.currentStreak
+                      : habitStreak.longestStreak}
+                  </span>
+                  <span className="text-xs">
+                    {habitStreak.currentStreak !== 0 ? (
+                      '🔥'
+                    ) : habitStreak.longestStreak ===
+                        habitStreak.currentStreak &&
+                      habitStreak.longestStreak !== 0 ? (
+                      '🔥'
+                    ) : (
+                      <Flame size={14} />
+                    )}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <Dialog>
           <DialogTrigger
@@ -155,7 +197,7 @@ const Streaks = () => {
           <DialogContent hideClose={true} className="max-w-sm">
             <DialogHeader>
               <DialogTitle className="text-center">
-                Create Your Habit
+                <p style={{ color: 'var(--text)' }}>Create Your Habit</p>
               </DialogTitle>
               <DialogDescription className="pt-4 flex flex-col gap-4">
                 <Input
@@ -163,20 +205,40 @@ const Streaks = () => {
                   placeholder="Name"
                   onChange={(e) => setNewHabitName(e.target.value)}
                 />
-                <Select
-                  onValueChange={(value: HabitFrequency) =>
-                    setSelectedFrequency(value)
-                  }
-                >
-                  <SelectTrigger className="">
-                    <SelectValue placeholder="Frequency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="frequency"
+                      value="daily"
+                      checked={selectedFrequency === 'daily'}
+                      onChange={() => setSelectedFrequency('daily')}
+                    />
+                    <span>Daily</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="frequency"
+                      value="weekly"
+                      checked={selectedFrequency === 'weekly'}
+                      onChange={() => setSelectedFrequency('weekly')}
+                    />
+                    <span>Weekly</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="frequency"
+                      value="monthly"
+                      checked={selectedFrequency === 'monthly'}
+                      onChange={() => setSelectedFrequency('monthly')}
+                    />
+                    <span>Monthly</span>
+                  </label>
+                </div>
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -218,7 +280,7 @@ const Streaks = () => {
                     style={{ color: 'var(--text)' }}
                   >
                     <div className="flex flex-col items-center gap-3">
-                      <span className="transform -rotate-90 text-[0.6rem] whitespace-nowrap leading-none">
+                      <span className="transform -rotate-90 text-[0.65rem] whitespace-nowrap leading-none">
                         {date.dayName.slice(0, 3)}
                       </span>
                       <span className="text-[0.6rem] leading-none">
@@ -230,14 +292,22 @@ const Streaks = () => {
               </tr>
             </thead>
             <tbody
-              className="divide-y"
+              className=""
               style={{
                 backgroundColor: 'var(--surface)',
                 borderColor: 'var(--border)',
               }}
             >
-              {habits.map((habit) => (
-                <tr key={habit.id} className="hover:opacity-80">
+              {habits.map((habit, index) => (
+                <tr
+                  key={habit.id}
+                  className="hover:opacity-80"
+                  style={{
+                    borderBottomWidth: index !== habits.length - 1 ? '1px' : '',
+                    borderColor:
+                      index !== habits.length - 1 ? 'var(--border)' : '',
+                  }}
+                >
                   <td
                     className="w-20 min-w-20 pl-2 py-2 text-xs font-medium sticky left-0 z-10 border-r"
                     style={{
@@ -246,15 +316,29 @@ const Streaks = () => {
                       borderColor: 'var(--border)',
                     }}
                   >
-                    <div className="overflow-hidden">
-                      <div className="text-xs max-w-28 font-medium truncate leading-tight">
+                    <div className="max-w-28 overflow-hidden">
+                      <div
+                        title={habit.name}
+                        className="text-xs font-medium truncate leading-tight"
+                      >
                         <p>{habit.name}</p>
                       </div>
-                      <div
-                        className="text-[0.6rem] italic capitalize leading-tight"
-                        style={{ color: 'var(--text-muted)' }}
-                      >
-                        {habit.frequency}
+                      <div className="flex items-center">
+                        <div
+                          className="text-[0.6rem] italic capitalize leading-tight"
+                          style={{ color: 'var(--text-muted)' }}
+                        >
+                          {habit.frequency}
+                        </div>
+                        <div
+                          className="flex items-center gap-2 px-2 py-1 rounded-lg text-xs cursor-pointer"
+                          style={{
+                            color: 'var(--text)',
+                          }}
+                          onClick={() => deleteHabit(habit.id)}
+                        >
+                          <Trash2 size={14} />
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -297,9 +381,7 @@ const Streaks = () => {
                                 ? 'var(--success)'
                                 : 'var(--border)',
                             }}
-                          >
-                            {/* {isCompleted ? '✓' : 'x'} */}
-                          </div>
+                          ></div>
                         </div>
                       </td>
                     );

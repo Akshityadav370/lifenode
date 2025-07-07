@@ -8,6 +8,7 @@ export interface Habit {
   frequency: HabitFrequency;
   streak: number;
   lastCompleted?: string; // Format: "YYYY-MM-DD"
+  month: string; // Format: "YYYY-MM"
   createdAt: string; // Format: "YYYY-MM-DD"
 }
 
