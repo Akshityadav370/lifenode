@@ -1,5 +1,5 @@
 import { DBSchema, openDB } from 'idb';
-import { Habit, HabitCompletion, Reminder, Task } from './data-types';
+import { Alarm, Habit, HabitCompletion, Task } from './data-types';
 
 interface LifeNodeDB extends DBSchema {
   habits: {
@@ -21,18 +21,18 @@ interface LifeNodeDB extends DBSchema {
       habitId_month: [number, string];
     };
   };
-  reminders: {
-    key: number;
-    value: Reminder;
-    indexes: {
-      date: string;
-    };
-  };
   tasks: {
     key: number;
     value: Task;
     indexes: {
       createdAt: string;
+    };
+  };
+  alarms: {
+    key: number;
+    value: Alarm;
+    indexes: {
+      name: string;
     };
   };
 }
@@ -60,20 +60,19 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
       habitCompletionsStore.createIndex('month', 'month'); // all completions of month
       habitCompletionsStore.createIndex('habitId_month', ['habitId', 'month']); // all completions of habitId for 'month'
     }
-    if (!db.objectStoreNames.contains('reminders')) {
-      const reminderStore = db.createObjectStore('reminders', {
-        keyPath: 'id',
-        autoIncrement: true,
-      });
-
-      reminderStore.createIndex('date', 'date'); // fetch reminders by day
-    }
     if (!db.objectStoreNames.contains('tasks')) {
       const tasksStore = db.createObjectStore('tasks', {
         keyPath: 'id',
         autoIncrement: true,
       });
       tasksStore.createIndex('createdAt', 'createdAt'); // fetch habits by day
+    }
+    if (!db.objectStoreNames.contains('alarms')) {
+      const alarmsStore = db.createObjectStore('alarms', {
+        keyPath: 'id',
+        autoIncrement: true,
+      });
+      alarmsStore.createIndex('name', 'name', { unique: true });
     }
   },
 });
