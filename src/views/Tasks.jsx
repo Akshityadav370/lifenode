@@ -1,5 +1,7 @@
+import TaskCalendar from '@/components/TaskCalendar/TaskCalendar';
+
 const Tasks = () => {
-  return <div>Tasks</div>;
+  return <TaskCalendar />;
 };
 
 export default Tasks;

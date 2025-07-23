@@ -7,6 +7,7 @@ import Streaks from './views/Streaks';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import ThemeContext from './context/theme';
 import { colorPalettes } from './lib/utils';
+import Tasks from './views/Tasks';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -108,17 +109,7 @@ function App() {
           </div>
           <div className="px-1">
             {activeTab === 'dashboard' && <Dashboard />}
-            {activeTab === 'tasks' && (
-              <div
-                className="p-8 text-center rounded-lg"
-                style={{
-                  backgroundColor: 'var(--surface)',
-                  color: 'var(--text)',
-                }}
-              >
-                Tasks functionality coming soon...
-              </div>
-            )}
+            {activeTab === 'tasks' && <Tasks />}
             {activeTab === 'streaks' && <Streaks />}
             {activeTab === 'reminders' && (
               <div
