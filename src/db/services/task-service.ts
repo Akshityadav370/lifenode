@@ -8,14 +8,16 @@ export class TaskService {
    * Create a new task
    */
   static async createTask(
-    taskData: Omit<Task, 'id' | 'createdAt'>
+    taskData: Omit<Task, 'id' | 'createdAt' | 'month'>,
+    dayId: string,
+    month: string
   ): Promise<Task> {
     const db = await dbPromise;
 
     const newTask: Omit<Task, 'id'> = {
       ...taskData,
-      createdAt: new Date().toISOString().slice(0, 11), // "YYYY-MM-DD" format
-      month: new Date().toISOString().slice(0, 8), // "YYYY-MM" format
+      createdAt: dayId, // "YYYY-MM-DD" format
+      month, // "YYYY-MM" format
     };
 
     const id = await db.add('tasks', newTask as Task);
@@ -53,11 +55,31 @@ export class TaskService {
     const db = await dbPromise;
 
     try {
-      const completions = await db.getAllFromIndex('tasks', 'month', month);
-      return completions;
+      const tasks = await db.getAllFromIndex('tasks', 'month', month);
+      return tasks;
     } catch (error) {
       console.error('Error fetching monthly tasks:', error);
       return [];
+    }
+  }
+
+  /**
+   * Update an existing task
+   */
+  static async updateTask(updatedTask: Task, dayId: string): Promise<boolean> {
+    const db = await dbPromise;
+
+    try {
+      const taskToUpdate = {
+        ...updatedTask,
+        createdAt: dayId,
+      };
+
+      await db.put('tasks', taskToUpdate);
+      return true;
+    } catch (error) {
+      console.error('Error updating task:', error);
+      return false;
     }
   }
 }

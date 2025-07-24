@@ -30,8 +30,93 @@ export const useMonthlyTasks = (month: string) => {
       setError(
         err instanceof Error ? err.message : 'Failed to load monthly tasks'
       );
+    } finally {
+      setLoading(false);
     }
   }, [month]);
+
+  const addNewTask = useCallback(
+    async (
+      newTask: Omit<Task, 'id' | 'createdAt' | 'month'>,
+      dayId: string
+    ) => {
+      try {
+        const addedTask = await TaskService.createTask(newTask, dayId, month);
+
+        setTasks((prevTasks) => {
+          const existingTasksOnDayId = prevTasks[dayId] || [];
+          return {
+            ...prevTasks,
+            [dayId]: [...existingTasksOnDayId, addedTask],
+          };
+        });
+
+        return addedTask;
+      } catch (error) {
+        console.error('Error creating task:', error);
+        setError('Failed to create task');
+        return null;
+      }
+    },
+    []
+  );
+
+  const deleteTask = useCallback(async (taskId: number, dayId: string) => {
+    try {
+      const success = await TaskService.deleteTask(taskId);
+
+      if (success) {
+        setTasks((prevTasks) => {
+          const existingTasks = prevTasks[dayId] || [];
+          const updatedTasks = existingTasks.filter(
+            (task) => task.id !== taskId
+          );
+
+          if (updatedTasks.length === 0) {
+            const { [dayId]: removed, ...rest } = prevTasks;
+            return rest;
+          }
+
+          return {
+            ...prevTasks,
+            [dayId]: updatedTasks,
+          };
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      setError('Failed to delete task');
+      return false;
+    }
+  }, []);
+
+  const updateTask = useCallback(async (updatedTask: Task, dayId: string) => {
+    try {
+      const success = await TaskService.updateTask(updatedTask, dayId);
+
+      if (success) {
+        setTasks((prevTasks) => {
+          const existingTasks = prevTasks[dayId] || [];
+          const updatedTasks = existingTasks.map((task) =>
+            task.id === updatedTask.id ? updatedTask : task
+          );
+
+          return {
+            ...prevTasks,
+            [dayId]: updatedTasks,
+          };
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error updating task:', error);
+      setError('Failed to update task');
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     loadMonthlyTasks();
@@ -42,5 +127,8 @@ export const useMonthlyTasks = (month: string) => {
     setTasks,
     loading,
     error,
+    addNewTask,
+    deleteTask,
+    updateTask,
   };
 };

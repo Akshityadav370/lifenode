@@ -74,7 +74,7 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
         keyPath: 'id',
         autoIncrement: true,
       });
-      tasksStore.createIndex('createdAt', 'createdAt'); // fetch habits by day
+      tasksStore.createIndex('createdAt', 'createdAt'); // fetch tasks by day
       tasksStore.createIndex('month', 'month'); // fetch all tasks of the month
     }
   },
