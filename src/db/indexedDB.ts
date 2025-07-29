@@ -26,6 +26,7 @@ interface LifeNodeDB extends DBSchema {
     value: Task;
     indexes: {
       createdAt: string;
+      month: string;
     };
   };
   alarms: {
@@ -65,7 +66,8 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
         keyPath: 'id',
         autoIncrement: true,
       });
-      tasksStore.createIndex('createdAt', 'createdAt'); // fetch habits by day
+      tasksStore.createIndex('createdAt', 'createdAt'); // fetch tasks by day
+      tasksStore.createIndex('month', 'month'); // fetch all tasks of the month
     }
     if (!db.objectStoreNames.contains('alarms')) {
       const alarmsStore = db.createObjectStore('alarms', {

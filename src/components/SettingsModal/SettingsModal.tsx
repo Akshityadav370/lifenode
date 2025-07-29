@@ -20,65 +20,8 @@ const SettingsModal = ({
           border: `1px solid var(--border)`,
         }}
       >
-        <h3
-          className="text-lg text-center font-semibold"
-          style={{ color: 'var(--text)' }}
-        >
-          Appearance
-        </h3>
-
-        {/* Theme Toggle */}
-        <div className="mb-4">
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: 'var(--text)' }}
-          >
-            Theme
-          </label>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onThemeChange('light')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
-                currentTheme === 'light' ? 'ring-2' : ''
-              }`}
-              style={{
-                backgroundColor:
-                  currentTheme === 'light'
-                    ? 'var(--primary)'
-                    : 'var(--surface)',
-                color: currentTheme === 'light' ? 'white' : 'var(--text)',
-                borderColor: 'var(--border)',
-              }}
-            >
-              <Sun size={16} />
-              Light
-            </button>
-            <button
-              onClick={() => onThemeChange('dark')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
-                currentTheme === 'dark' ? 'ring-2' : ''
-              }`}
-              style={{
-                backgroundColor:
-                  currentTheme === 'dark' ? 'var(--primary)' : 'var(--surface)',
-                color: currentTheme === 'dark' ? 'white' : 'var(--text)',
-                borderColor: 'var(--border)',
-              }}
-            >
-              <Moon size={16} />
-              Dark
-            </button>
-          </div>
-        </div>
-
         {/* Color Palette */}
         <div className="mb-4">
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: 'var(--text)' }}
-          >
-            Color Palette
-          </label>
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(colorPalettes).map(([key, palette]) => (
               <button

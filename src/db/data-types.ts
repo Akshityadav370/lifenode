@@ -25,6 +25,7 @@ export interface Task {
   title: string;
   description?: string;
   createdAt: string; // Format: "YYYY-MM-DD"
+  month: string; // Format: "YYYY-MM"
   completed: boolean;
 }
 

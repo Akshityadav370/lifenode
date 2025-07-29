@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './App.css';
-import { Coffee, House, Palette, Settings } from 'lucide-react';
+import { Coffee, House, Moon, Palette, Settings, Sun } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Dashboard from './views/Dashboard';
 import Streaks from './views/Streaks';
@@ -8,6 +8,7 @@ import SettingsModal from './components/SettingsModal/SettingsModal';
 import ThemeContext from './context/theme';
 import { colorPalettes } from './lib/utils';
 import Reminders from './views/Reminders';
+import Tasks from './views/Tasks';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -75,9 +76,9 @@ function App() {
               LifeNode
             </h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 transition-500">
             <div
-              className="my-button flex items-center gap-2 px-2 py-1 rounded-lg text-xs cursor-pointer"
+              className="my-button flex items-center gap-2 px-2 py-1 rounded-lg text-xs cursor-pointer border"
               style={{
                 color: 'var(--text)',
               }}
@@ -85,7 +86,24 @@ function App() {
               <Coffee size={15} />
               <span>Buy me coffee</span>
             </div>
-            <Settings size={16} />
+            <button
+              onClick={() =>
+                handleThemeChange(currentTheme === 'light' ? 'dark' : 'light')
+              }
+              className="p-1 rounded-lg transition-colors duration-900 focus:outline-none"
+              style={{ backgroundColor: 'var(--surface)' }}
+            >
+              <span
+                className="block transition-all duration-900 ease-in-out transform"
+                style={{ color: 'var(--text)' }}
+              >
+                {currentTheme === 'light' ? (
+                  <Sun size={16} />
+                ) : (
+                  <Moon size={16} />
+                )}
+              </span>
+            </button>
             <button
               onClick={() => setSettingsOpen(true)}
               className="p-1 rounded-lg transition-colors"
@@ -93,6 +111,7 @@ function App() {
             >
               <Palette size={16} style={{ color: 'var(--text)' }} />
             </button>
+            <Settings size={16} />
           </div>
         </header>
         <main className="w-[48rem]">
@@ -109,17 +128,7 @@ function App() {
           </div>
           <div className="px-1">
             {activeTab === 'dashboard' && <Dashboard />}
-            {activeTab === 'tasks' && (
-              <div
-                className="p-8 text-center rounded-lg"
-                style={{
-                  backgroundColor: 'var(--surface)',
-                  color: 'var(--text)',
-                }}
-              >
-                Tasks functionality coming soon...
-              </div>
-            )}
+            {activeTab === 'tasks' && <Tasks />}
             {activeTab === 'streaks' && <Streaks />}
             {activeTab === 'reminders' && <Reminders />}
           </div>
