@@ -20,14 +20,6 @@ export interface HabitCompletion {
   completed: boolean;
 }
 
-// export interface Reminder {
-//   id: number;
-//   message: string;
-//   time: string; // Format: "HH:mm"
-//   frequency: ReminderFrequency;
-//   date: string; // Format: "YYYY-MM-DD"
-// }
-
 export interface Task {
   id: number;
   title: string;
@@ -43,4 +35,6 @@ export interface Alarm {
   intervalMinutes?: number;
   fromTime?: string;
   toTime?: string;
+  title: string;
+  message: string;
 }

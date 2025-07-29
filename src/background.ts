@@ -29,8 +29,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   chrome.notifications.create({
     type: 'basic',
     iconUrl: 'icon.png',
-    title: 'Alarm Reminder',
-    message: `Alarm: ${alarm.name} is ringing!`,
+    title: meta.title ? meta.title : 'Alarm Reminder',
+    message: meta.message ? meta.message : `Alarm: ${alarm.name} is ringing!`,
     priority: 2,
   });
 });

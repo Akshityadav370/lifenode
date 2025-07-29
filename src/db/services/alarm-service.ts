@@ -14,14 +14,14 @@ export const AlarmService = {
     const db = await dbPromise;
     if (!Array.from(db.objectStoreNames).includes(STORE)) return;
     const id = await db.add(STORE, meta);
-    chrome.alarms
-      .create(meta.name, {
-        when: meta.time,
-        periodInMinutes: meta.intervalMinutes,
-      })
-      .then(() => {
-        console.log('created alarm');
-      });
+
+    const alarmOptions: chrome.alarms.AlarmCreateInfo = {
+      when: meta.time,
+      periodInMinutes: meta.intervalMinutes,
+    };
+
+    await chrome.alarms.create(meta.name, alarmOptions);
+
     return id;
   },
 
