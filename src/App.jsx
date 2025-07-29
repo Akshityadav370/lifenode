@@ -7,6 +7,7 @@ import Streaks from './views/Streaks';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import ThemeContext from './context/theme';
 import { colorPalettes } from './lib/utils';
+import Reminders from './views/Reminders';
 import Tasks from './views/Tasks';
 
 function App() {
@@ -129,17 +130,7 @@ function App() {
             {activeTab === 'dashboard' && <Dashboard />}
             {activeTab === 'tasks' && <Tasks />}
             {activeTab === 'streaks' && <Streaks />}
-            {activeTab === 'reminders' && (
-              <div
-                className="p-8 text-center rounded-lg"
-                style={{
-                  backgroundColor: 'var(--surface)',
-                  color: 'var(--text)',
-                }}
-              >
-                Reminders functionality coming soon...
-              </div>
-            )}
+            {activeTab === 'reminders' && <Reminders />}
           </div>
         </main>
         <SettingsModal

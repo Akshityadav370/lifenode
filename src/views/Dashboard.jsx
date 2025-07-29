@@ -1,3 +1,5 @@
+import { AlarmsModal } from '../components/AlarmsModal';
+
 const Dashboard = () => {
   return (
     <div className="flex flex-col gap-2">
@@ -7,7 +9,7 @@ const Dashboard = () => {
           <span>Tasks here</span>
         </div>
         <div className="flex-1 ">
-          <span>Reminders here</span>
+          <AlarmsModal />
         </div>
       </div>
       <div className="">chat history here</div>
