@@ -13,9 +13,19 @@ const PRESETS = [
   { label: '1d', value: 60 * 24 },
 ];
 
+function generateRandomString(length: number) {
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+
 const Reminders = () => {
   const [alarms, setAlarms] = useState<Alarm[]>([]);
-  const [name, setName] = useState('');
   const [interval, setInterval] = useState<number | null>(null);
   const [custom, setCustom] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,25 +56,7 @@ const Reminders = () => {
     }
   }, [error]);
 
-  const validateName = (name: string): string | null => {
-    if (!name.trim()) {
-      return 'Name is required';
-    }
-    if (
-      alarms.some((alarm) => alarm.name.toLowerCase() === name.toLowerCase())
-    ) {
-      return 'Name already exists';
-    }
-    return null;
-  };
-
   const handleAdd = async () => {
-    const nameError = validateName(name);
-    if (nameError) {
-      setError(nameError);
-      return;
-    }
-
     if (!interval && !custom) {
       setError('Please select or enter an interval');
       return;
@@ -76,7 +68,7 @@ const Reminders = () => {
     const now = Date.now();
     const minutes = interval || parseInt(custom);
     const meta: Alarm = {
-      name: name.trim(),
+      name: generateRandomString(5),
       time: now + minutes * 60 * 1000,
       intervalMinutes: minutes,
       fromTime: enableTimeWindow ? fromTime : undefined,
@@ -89,7 +81,6 @@ const Reminders = () => {
     await AlarmService.addAlarm(meta);
 
     // Reset form
-    setName('');
     setInterval(null);
     setCustom('');
     setFromTime('09:00');
@@ -114,7 +105,7 @@ const Reminders = () => {
     <div className="w-full min-w-[600px]">
       <div className="space-y-3">
         <div className="flex gap-3">
-          <div className="flex-1">
+          {/* <div className="flex-1">
             <Label
               className="text-xs font-medium mb-1 block ml-1"
               style={{ color: 'var(--text)' }}
@@ -135,8 +126,8 @@ const Reminders = () => {
                 color: 'var(--text)',
               }}
             />
-          </div>
-          <div className="flex-1">
+          </div> */}
+          <div className="w-[50%]">
             <Label
               className="text-xs font-medium mb-1 block ml-1"
               style={{ color: 'var(--text)' }}
@@ -155,7 +146,7 @@ const Reminders = () => {
               }}
             />
           </div>
-          <div className="flex-1">
+          <div className="w-full">
             <Label
               className="text-xs font-medium mb-1 block ml-1"
               style={{ color: 'var(--text)' }}
@@ -269,7 +260,7 @@ const Reminders = () => {
                   value={fromTime}
                   onChange={(e) => setFromTime(e.target.value)}
                   disabled={loading}
-                  className="text-sm h-8"
+                  className="text-sm p-0 px-2 items-center"
                   style={{
                     backgroundColor: 'var(--surface)',
                     color: 'var(--text)',
@@ -288,7 +279,7 @@ const Reminders = () => {
                   value={toTime}
                   onChange={(e) => setToTime(e.target.value)}
                   disabled={loading}
-                  className="text-sm h-8"
+                  className="text-sm p-0 px-2 items-center"
                   style={{
                     backgroundColor: 'var(--surface)',
                     color: 'var(--text)',
@@ -331,13 +322,12 @@ const Reminders = () => {
 
           <Button
             onClick={handleAdd}
-            disabled={loading || !name.trim() || (!interval && !custom)}
+            disabled={loading || (!interval && !custom) || !title}
             className="h-8 px-4 flex items-center gap-2"
             style={{
               backgroundColor: 'var(--accent)',
               color: 'var(--surface)',
-              opacity:
-                loading || !name.trim() || (!interval && !custom) ? 0.5 : 1,
+              opacity: loading || (!interval && !custom) || !title ? 0.5 : 1,
             }}
           >
             <Plus size={14} />
@@ -386,12 +376,13 @@ const Reminders = () => {
                   color: 'var(--text)',
                 }}
               >
-                <div className="flex-1 min-w-0 mr-2">
-                  <div className="font-medium truncate">{a.name}</div>
+                <div className="flex-1 gap-4 mr-2">
+                  <div className="font-medium truncate mb-1">
+                    {a.title && <p>"{a.title}"</p>}
+                  </div>
 
-                  {(a.title || a.message) && (
+                  {a.message && (
                     <div className="opacity-60 text-xs truncate">
-                      {a.title && <p>"{a.title}"</p>}
                       {a.message && <p>{a.message}</p>}
                     </div>
                   )}
