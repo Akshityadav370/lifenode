@@ -34,6 +34,7 @@ const Streaks = () => {
   const [selectedFrequency, setSelectedFrequency] = useState<
     HabitFrequency | undefined
   >('daily');
+  const [dialopOpen, setDialogOpen] = useState(false);
 
   const {
     habits,
@@ -89,9 +90,10 @@ const Streaks = () => {
         month: currentMonth,
       });
       setNewHabitName('');
+      setDialogOpen(false);
     }
   };
-  console.log(habitsWithStreaks);
+  // console.log(habitsWithStreaks);
 
   const formatMonthYear = (month) => {
     const [year, monthNum] = month.split('-');
@@ -186,11 +188,11 @@ const Streaks = () => {
             ))}
           </div>
         </div>
-        <Dialog>
+        <Dialog open={dialopOpen}>
           <DialogTrigger
             className="p-1 rounded"
             style={{ backgroundColor: 'var(--primary)', color: 'white' }}
-            onClick={handleAddHabit}
+            onClick={() => setDialogOpen(true)}
           >
             <Plus size={18} />
           </DialogTrigger>
