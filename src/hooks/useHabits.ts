@@ -242,6 +242,13 @@ export const useMonthlyHabitsWithStreaks = (month: string) => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeStreaks, setActiveStreaks] = useState<
+    Array<{
+      habitData: Habit & { completions: Record<string, HabitCompletion> };
+      currentStreak: number;
+      longestStreak: number;
+    }>
+  >([]);
 
   const loadMonthlyHabitsWithStreaks = useCallback(async () => {
     try {
@@ -260,14 +267,27 @@ export const useMonthlyHabitsWithStreaks = (month: string) => {
     }
   }, [month]);
 
+  const loadActiveStreaks = useCallback(() => {
+    const habitsWithActiveStreaks = habitsWithStreaks.filter(
+      (habit) => habit.currentStreak === habit.longestStreak
+    );
+    setActiveStreaks(habitsWithActiveStreaks);
+  }, [habitsWithStreaks]);
+
   useEffect(() => {
     loadMonthlyHabitsWithStreaks();
-  }, [loadMonthlyHabitsWithStreaks]);
+  }, [loadMonthlyHabitsWithStreaks, month]);
+
+  useEffect(() => {
+    loadActiveStreaks();
+  }, [month, habitsWithStreaks]);
 
   return {
     habitsWithStreaks,
+    activeStreaks,
     loading,
     error,
     loadMonthlyHabitsWithStreaks,
+    loadActiveStreaks,
   };
 };

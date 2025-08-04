@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { HabitFrequency } from '@/db/data-types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,11 @@ const Streaks = () => {
     HabitFrequency | undefined
   >('daily');
   const [dialopOpen, setDialogOpen] = useState(false);
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const scrollContainerRef = useRef(null);
 
   const {
     habits,
@@ -114,6 +119,56 @@ const Streaks = () => {
     return `${monthNames[parseInt(monthNum) - 1]} ${year}`;
   };
 
+  const handleMouseDown = (e) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+    scrollContainerRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    const touch = e.touches[0];
+    setStartX(touch.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    const touch = e.touches[0];
+    const x = touch.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   useEffect(() => {
     loadMonthlyHabitsWithStreaks();
   }, [habits]);
@@ -154,7 +209,18 @@ const Streaks = () => {
             <ChevronRight size={16} style={{ color: 'var(--text)' }} />
           </button>
         </div>
-        <div className="flex-1 mx-2 overflow-scroll mask-fade-right pr-16 hide-scrollbar">
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 mx-2 overflow-scroll mask-fade-right pr-16 hide-scrollbar select-none"
+          style={{ cursor: 'grab' }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="flex w-fit gap-2">
             {habitsWithStreaks.map((habitStreak) => (
               <div
