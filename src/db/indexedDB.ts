@@ -6,7 +6,6 @@ interface LifeNodeDB extends DBSchema {
     key: number;
     value: Habit;
     indexes: {
-      createdAt: string;
       month: string;
     };
   };
@@ -15,9 +14,7 @@ interface LifeNodeDB extends DBSchema {
     value: HabitCompletion;
     indexes: {
       habitId: number;
-      date: string;
       habitId_date: [number, string];
-      month: string;
       habitId_month: [number, string];
     };
   };
@@ -25,7 +22,6 @@ interface LifeNodeDB extends DBSchema {
     key: number;
     value: Task;
     indexes: {
-      createdAt: string;
       month: string;
     };
   };
@@ -46,7 +42,6 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
         autoIncrement: true,
       });
 
-      habitStore.createIndex('createdAt', 'createdAt'); // fetch habits by id
       habitStore.createIndex('month', 'month'); // fetch habits by month
     }
     if (!db.objectStoreNames.contains('habitCompletions')) {
@@ -56,9 +51,7 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
       });
 
       habitCompletionsStore.createIndex('habitId', 'habitId'); // all completions of a habit
-      habitCompletionsStore.createIndex('date', 'date'); // all completions on a date
       habitCompletionsStore.createIndex('habitId_date', ['habitId', 'date']); // lookup specific day's status for a habit
-      habitCompletionsStore.createIndex('month', 'month'); // all completions of month
       habitCompletionsStore.createIndex('habitId_month', ['habitId', 'month']); // all completions of habitId for 'month'
     }
     if (!db.objectStoreNames.contains('tasks')) {
@@ -66,7 +59,6 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
         keyPath: 'id',
         autoIncrement: true,
       });
-      tasksStore.createIndex('createdAt', 'createdAt'); // fetch tasks by day
       tasksStore.createIndex('month', 'month'); // fetch all tasks of the month
     }
     if (!db.objectStoreNames.contains('alarms')) {
