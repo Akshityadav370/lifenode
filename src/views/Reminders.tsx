@@ -38,7 +38,7 @@ const Reminders = () => {
 
   const fetchAlarms = async () => {
     const fetchedAlarms = await AlarmService.getAlarms();
-    console.log('fetchedAlarms', JSON.stringify(fetchedAlarms));
+    // console.log('fetchedAlarms', JSON.stringify(fetchedAlarms));
     setAlarms(fetchedAlarms);
   };
 

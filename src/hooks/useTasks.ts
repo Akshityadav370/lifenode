@@ -1,11 +1,41 @@
 import { Task } from '@/db/data-types';
 import { TaskService } from '@/db/services/task-service';
-import { useCallback, useEffect, useState } from 'react';
+import { addDays, endOfWeek, format, parseISO, startOfWeek } from 'date-fns';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export const useMonthlyTasks = (month: string) => {
   const [tasks, setTasks] = useState<{ [key: string]: Task[] }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const currentDate = new Date();
+  const currentDay = format(currentDate, 'yyyy-MM-dd');
+  const tomorrowDay = format(addDays(currentDate, 1), 'yyyy-MM-dd');
+
+  const todayTasks = useMemo(
+    () => tasks[currentDay] || [],
+    [tasks, currentDay]
+  );
+
+  const tomorrowTasks = useMemo(
+    () => tasks[tomorrowDay] || [],
+    [tasks, tomorrowDay]
+  );
+
+  const weeklyTasks = useMemo(() => {
+    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
+    const result: Task[] = [];
+
+    for (const [date, dayTasks] of Object.entries(tasks)) {
+      const taskDate = parseISO(date);
+      if (taskDate >= weekStart && taskDate <= weekEnd) {
+        result.push(...dayTasks);
+      }
+    }
+
+    return result;
+  }, [tasks, currentDate]);
 
   // Group tasks by date for efficient lookup
   const tasksByDate = useCallback((newTasks: Task[]) => {
@@ -124,6 +154,9 @@ export const useMonthlyTasks = (month: string) => {
 
   return {
     tasks,
+    todayTasks,
+    tomorrowTasks,
+    weeklyTasks,
     setTasks,
     loading,
     error,
