@@ -16,7 +16,7 @@ const Dashboard = () => {
   const { activeStreaks } = useMonthlyHabitsWithStreaks(currentMonth);
   const { todayTasks, tomorrowTasks, weeklyTasks, updateTask, deleteTask } =
     useMonthlyTasks(currentMonth);
-  console.log('active streaks', activeStreaks);
+
   const getCurrentTasks = () => {
     switch (taskView) {
       case 'today':
