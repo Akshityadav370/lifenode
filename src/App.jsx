@@ -113,7 +113,10 @@ function App() {
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <div
+            <a
+              href="https://www.buymeacoffee.com/akshityadav"
+              target="_blank"
+              rel="noopener noreferrer"
               className="my-button flex items-center gap-2 px-2 py-1 rounded-lg text-xs cursor-pointer border"
               style={{
                 color: 'var(--text)',
@@ -121,7 +124,7 @@ function App() {
             >
               <Coffee size={15} />
               <span>Buy me coffee</span>
-            </div>
+            </a>
             <button
               onClick={() =>
                 handleThemeChange(currentTheme === 'light' ? 'dark' : 'light')
