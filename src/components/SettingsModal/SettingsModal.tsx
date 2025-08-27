@@ -1,6 +1,7 @@
-import { Bot, Palette } from 'lucide-react';
+import { Bot, Palette, MessageSquare } from 'lucide-react';
 import ModelConfiguration from '../ModelConfiguration/ModelConfiguration';
 import ThemeSettingsModal from '../ThemeSettingsModal/ThemeSettingsModal';
+import RequestFeature from '../RequestFeature/RequestFeature';
 import { ValidModel } from '@/constants/valid_model';
 import { useState } from 'react';
 
@@ -22,16 +23,24 @@ const SettingsModal = ({
   onThemeChange,
 }: SettingsModalProps) => {
   if (!isOpen) return null;
-  const [activeTab, setActiveTab] = useState<'model' | 'theme'>('model');
+  const [activeTab, setActiveTab] = useState<'model' | 'theme' | 'feature'>(
+    'model'
+  );
 
   const handleModelConfigSaved = (model: ValidModel, apiKey: string) => {
     // console.log('Model configuration saved:', { model, apiKey: '***' });
   };
 
+  const tabs = [
+    { id: 'theme', label: 'Theme', icon: Palette },
+    { id: 'model', label: 'AI Model', icon: Bot },
+    { id: 'feature', label: 'Feature Request', icon: MessageSquare },
+  ] as const;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4"
+        className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden"
         style={{
           backgroundColor: 'var(--surface)',
           borderColor: 'var(--border)',
@@ -49,7 +58,7 @@ const SettingsModal = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 text-xl font-bold"
             style={{ color: 'var(--text-muted)' }}
           >
             ✕
@@ -58,42 +67,33 @@ const SettingsModal = ({
 
         {/* Tab Navigation */}
         <div className="flex border-b" style={{ borderColor: 'var(--border)' }}>
-          <button
-            onClick={() => setActiveTab('theme')}
-            className={`flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'theme'
-                ? 'border-blue-500'
-                : 'border-transparent hover:border-gray-300'
-            } focus:outline-none focus-within:outline-none`}
-            style={{
-              color: activeTab === 'theme' ? 'var(--primary)' : 'var(--text)',
-            }}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Palette size={16} />
-              Theme
-            </div>
-          </button>
-          <button
-            onClick={() => setActiveTab('model')}
-            className={`flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'model'
-                ? 'border-blue-500'
-                : 'border-transparent hover:border-gray-300'
-            } focus:outline-none focus-within:outline-none`}
-            style={{
-              color: activeTab === 'model' ? 'var(--primary)' : 'var(--text)',
-            }}
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Bot size={16} />
-              AI Model
-            </div>
-          </button>
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 py-3 px-2 text-xs font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-blue-500'
+                    : 'border-transparent hover:border-gray-300'
+                } focus:outline-none focus-within:outline-none`}
+                style={{
+                  color:
+                    activeTab === tab.id ? 'var(--primary)' : 'var(--text)',
+                }}
+              >
+                <div className="flex items-center justify-center gap-1">
+                  <Icon size={14} />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab Content */}
-        <div className="p-4">
+        <div className="p-4 max-h-[calc(90vh-120px)] overflow-y-auto">
           {activeTab === 'theme' && (
             <ThemeSettingsModal
               isOpen={activeTab === 'theme'}
@@ -115,6 +115,8 @@ const SettingsModal = ({
               />
             </div>
           )}
+
+          {activeTab === 'feature' && <RequestFeature onClose={onClose} />}
         </div>
       </div>
     </div>
