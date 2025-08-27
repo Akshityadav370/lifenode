@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { CheckCircle2, MessageSquare, Bell, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { AlarmService } from '@/db/services/alarm-service';
+import { useChatService } from '@/hooks/useChatService';
 
 const Dashboard = () => {
   // eslint-disable-next-line no-unused-vars
@@ -12,10 +13,12 @@ const Dashboard = () => {
   );
   const [taskView, setTaskView] = useState('today');
   const [alarms, setAlarms] = useState([]);
+  const [chats, setChats] = useState([]);
 
   const { activeStreaks } = useMonthlyHabitsWithStreaks(currentMonth);
   const { todayTasks, tomorrowTasks, weeklyTasks, updateTask, deleteTask } =
     useMonthlyTasks(currentMonth);
+  const { fetchAllChats, clearChatHistory } = useChatService();
 
   const getCurrentTasks = () => {
     switch (taskView) {
@@ -59,12 +62,24 @@ const Dashboard = () => {
     await deleteTask(taskId, dayId);
   };
 
+  const handleClearChat = async (problemName) => {
+    await clearChatHistory(problemName);
+    const allChats = await fetchAllChats();
+    setChats(allChats.reverse());
+  };
+
   useEffect(() => {
     const fetchAlarms = async () => {
       const fetchedAlarms = await AlarmService.getAlarms();
       setAlarms(fetchedAlarms);
     };
+    const loadChats = async () => {
+      const allChats = await fetchAllChats();
+      console.log('allChats', allChats);
+      setChats(allChats.reverse());
+    };
     fetchAlarms();
+    loadChats();
   }, []);
 
   return (
@@ -232,7 +247,7 @@ const Dashboard = () => {
             ) : (
               <div className="text-center py-6">
                 <CheckCircle2
-                  className="w-8 h-8 mx-auto mb-2"
+                  className="w-6 h-6 mx-auto mb-2"
                   style={{ color: 'var(--textMuted)' }}
                 />
                 <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
@@ -264,7 +279,7 @@ const Dashboard = () => {
               Active Reminders
             </h2>
             <span
-              className="px-1 py-1 text-sm font-medium ml-1"
+              className="px-1 py-1 text-sm font-medium"
               style={{
                 color: 'var(--text)',
               }}
@@ -323,7 +338,7 @@ const Dashboard = () => {
             ) : (
               <div className="text-center py-6">
                 <Bell
-                  className="w-8 h-8 mx-auto mb-2"
+                  className="w-6 h-6 mx-auto mb-2"
                   style={{ color: 'var(--textMuted)' }}
                 />
                 <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
@@ -357,34 +372,50 @@ const Dashboard = () => {
           >
             Chat History
           </h2>
-          <span
-            className="px-2 py-1 rounded-full text-xs font-medium"
-            style={{
-              backgroundColor: 'var(--accent)',
-              color: 'var(--surface)',
-            }}
-          >
-            Coming Soon
-          </span>
         </div>
 
-        <div
-          className="text-center py-8 border-2 border-dashed rounded-lg"
-          style={{ borderColor: 'var(--border)' }}
-        >
-          <MessageSquare
-            className="w-12 h-12 mx-auto mb-3"
-            style={{ color: 'var(--textMuted)' }}
-          />
-          <h3
-            className="text-base font-medium mb-2"
-            style={{ color: 'var(--text)' }}
-          >
-            Chat History Coming Soon!
-          </h3>
-          <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
-            Your conversation history with the AI assistant will appear here.
-          </p>
+        <div className="space-y-2 max-h-48 overflow-y-auto hide-scrollbar">
+          {chats.length > 0 ? (
+            chats.map((chatName) => (
+              <div
+                key={chatName}
+                className="flex items-center justify-between p-2 px-3 rounded-md border hover:opacity-80 transition-colors"
+                style={{
+                  backgroundColor: 'var(--background)',
+                  borderColor: 'var(--border)',
+                }}
+              >
+                <span
+                  className="text-sm font-medium truncate"
+                  style={{ color: 'var(--text)' }}
+                >
+                  {chatName}
+                </span>
+
+                <button
+                  onClick={() => handleClearChat(chatName)}
+                  className="p-1 hover:bg-red-50 rounded transition-colors"
+                  title="Delete chat"
+                  style={{ color: 'var(--error)' }}
+                >
+                  <Trash2 className="size-3" />
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-6">
+              <MessageSquare
+                className="w-6 h-6 mx-auto mb-2"
+                style={{ color: 'var(--textMuted)' }}
+              />
+              <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
+                No chat history yet
+              </p>
+              <p className="text-xs" style={{ color: 'var(--textMuted)' }}>
+                Start solving a problem to see it here!
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

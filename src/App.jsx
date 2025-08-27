@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 import { Coffee, House, Moon, Palette, Settings, Sun } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Dashboard from './views/Dashboard';
 import Streaks from './views/Streaks';
-import SettingsModal from './components/SettingsModal/SettingsModal';
 import ThemeContext from './context/theme';
 import { colorPalettes } from './lib/utils';
 import Reminders from './views/Reminders';
 import Tasks from './views/Tasks';
+import SettingsModal from './components/SettingsModal/SettingsModal';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -19,25 +18,62 @@ function App() {
   const currentColors = colorPalettes[currentPalette][currentTheme];
 
   useEffect(() => {
-    const savedPalette = localStorage.getItem('lifenode-palette');
-    const savedTheme = localStorage.getItem('lifenode-theme');
+    const loadSettings = async () => {
+      try {
+        const result = await chrome.storage.sync.get([
+          'lifenode-palette',
+          'lifenode-theme',
+        ]);
 
-    if (savedPalette && colorPalettes[savedPalette]) {
-      setCurrentPalette(savedPalette);
-    }
-    if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
-      setCurrentTheme(savedTheme);
-    }
+        if (
+          result['lifenode-palette'] &&
+          colorPalettes[result['lifenode-palette']]
+        ) {
+          setCurrentPalette(result['lifenode-palette']);
+        }
+        if (
+          result['lifenode-theme'] &&
+          ['light', 'dark'].includes(result['lifenode-theme'])
+        ) {
+          setCurrentTheme(result['lifenode-theme']);
+        }
+      } catch (error) {
+        console.error('Failed to load settings from Chrome storage:', error);
+        const savedPalette = localStorage.getItem('lifenode-palette');
+        const savedTheme = localStorage.getItem('lifenode-theme');
+
+        if (savedPalette && colorPalettes[savedPalette]) {
+          setCurrentPalette(savedPalette);
+        }
+        if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
+          setCurrentTheme(savedTheme);
+        }
+      }
+    };
+
+    loadSettings();
   }, []);
 
-  const handlePaletteChange = (palette) => {
+  const handlePaletteChange = async (palette) => {
     setCurrentPalette(palette);
-    localStorage.setItem('lifenode-palette', palette);
+    try {
+      await chrome.storage.sync.set({ 'lifenode-palette': palette });
+      localStorage.setItem('lifenode-palette', palette);
+    } catch (error) {
+      console.error('Failed to save palette to Chrome storage:', error);
+      localStorage.setItem('lifenode-palette', palette);
+    }
   };
 
-  const handleThemeChange = (theme) => {
+  const handleThemeChange = async (theme) => {
     setCurrentTheme(theme);
-    localStorage.setItem('lifenode-theme', theme);
+    try {
+      await chrome.storage.sync.set({ 'lifenode-theme': theme });
+      localStorage.setItem('lifenode-theme', theme);
+    } catch (error) {
+      console.error('Failed to save theme to Chrome storage:', error);
+      localStorage.setItem('lifenode-theme', theme);
+    }
   };
 
   const TabButton = ({ value, children, isActive }) => (
@@ -77,7 +113,10 @@ function App() {
             </h2>
           </div>
           <div className="flex items-center gap-3">
-            <div
+            <a
+              href="https://www.buymeacoffee.com/akshityadav"
+              target="_blank"
+              rel="noopener noreferrer"
               className="my-button flex items-center gap-2 px-2 py-1 rounded-lg text-xs cursor-pointer border"
               style={{
                 color: 'var(--text)',
@@ -85,7 +124,7 @@ function App() {
             >
               <Coffee size={15} />
               <span>Buy me coffee</span>
-            </div>
+            </a>
             <button
               onClick={() =>
                 handleThemeChange(currentTheme === 'light' ? 'dark' : 'light')
@@ -109,9 +148,8 @@ function App() {
               className="p-1 rounded-lg transition-colors"
               style={{ backgroundColor: 'var(--surface)' }}
             >
-              <Palette size={16} style={{ color: 'var(--text)' }} />
+              <Settings size={16} style={{ color: 'var(--text)' }} />
             </button>
-            <Settings size={16} />
           </div>
         </header>
         <main className="w-[48rem]">

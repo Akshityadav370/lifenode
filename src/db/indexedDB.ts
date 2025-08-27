@@ -1,5 +1,6 @@
 import { DBSchema, openDB } from 'idb';
 import { Alarm, Habit, HabitCompletion, Task } from './data-types';
+import { ChatHistory } from './chat-types';
 
 interface LifeNodeDB extends DBSchema {
   habits: {
@@ -30,6 +31,13 @@ interface LifeNodeDB extends DBSchema {
     value: Alarm;
     indexes: {
       name: string;
+    };
+  };
+  chats: {
+    key: string;
+    value: { problemName: string; chatHistory: ChatHistory[] };
+    indexes: {
+      problemName: string;
     };
   };
 }
@@ -67,6 +75,12 @@ export const dbPromise = openDB<LifeNodeDB>('lifenode-db', 1, {
         autoIncrement: true,
       });
       alarmsStore.createIndex('name', 'name', { unique: true });
+    }
+    if (!db.objectStoreNames.contains('chats')) {
+      const chatStore = db.createObjectStore('chats', {
+        keyPath: 'problemName',
+      });
+      chatStore.createIndex('problemName', 'problemName', { unique: true });
     }
   },
 });
