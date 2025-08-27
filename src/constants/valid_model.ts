@@ -13,13 +13,13 @@ export const VALID_MODELS = [
     display: 'GPT-4 Optimized',
   },
   {
-    model: 'gemini-1.5-pro-latest',
-    name: 'gemini_1.5_pro',
-    display: 'Gemini 1.5 Pro (Latest)',
+    model: 'gemini-2.0-flash',
+    name: 'gemini_2.0_flash',
+    display: 'Gemini 2.0 Flash',
   },
 ];
 
 /**
  * Type of valid models that can be used in the application.
  */
-export type ValidModel = 'openai_3.5_turbo' | 'openai_4o' | 'gemini_1.5_pro';
+export type ValidModel = 'openai_3.5_turbo' | 'openai_4o' | 'gemini_2.0_flash';

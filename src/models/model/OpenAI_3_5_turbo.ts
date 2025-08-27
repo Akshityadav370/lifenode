@@ -1,4 +1,4 @@
-import { VALID_MODELS } from '@/constants/valid_modal';
+import { VALID_MODELS } from '@/constants/valid_model';
 import { createOpenAI } from '@ai-sdk/openai';
 import { generateObjectResponse } from '../utils';
 import {

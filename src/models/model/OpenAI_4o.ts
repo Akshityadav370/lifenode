@@ -5,7 +5,7 @@ import {
   ModelInterface,
 } from '../model-interface';
 import { generateObjectResponse } from '../utils';
-import { VALID_MODELS } from '@/constants/valid_modal';
+import { VALID_MODELS } from '@/constants/valid_model';
 
 export class OpenAi_4o implements ModelInterface {
   name = 'openai_4o';
@@ -33,7 +33,6 @@ export class OpenAi_4o implements ModelInterface {
         prompt: props.prompt,
         extractedCode: props.extractedCode,
       });
-
       return {
         error: null,
         success: data.object,

@@ -1,6 +1,6 @@
+import React, { useCallback, useEffect, useState } from 'react';
 import { VALID_MODELS, ValidModel } from '@/constants/valid_model';
 import { useChromeStorage } from '@/hooks/useChromeStorage';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import {
@@ -13,37 +13,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
-import { Bot, Settings, Check, AlertCircle } from 'lucide-react';
+import { Settings, Check, AlertCircle } from 'lucide-react';
 import { Input } from '../ui/input';
-import ChatBox from '../ChatBox/ChatBox';
-import { colorPalettes } from '@/lib/utils';
-import ThemeContext from '@/context/theme';
 
-const ContentPage = () => {
-  const [chatboxExpanded, setChatboxExpanded] = useState<boolean>(false);
-  const [currentModel, setCurrentModel] = useState<ValidModel | null>(null);
-  const [currentApiKey, setCurrentApiKey] = useState<string | null>(null);
-  const [currentPalette, setCurrentPalette] = useState('ocean');
-  const [currentTheme, setCurrentTheme] = useState('light');
+interface ModelConfigurationProps {
+  onConfigurationSaved?: (model: ValidModel, apiKey: string) => void;
+  onModelChange?: (model: ValidModel) => void;
+  className?: string;
+  showTitle?: boolean;
+  autoLoad?: boolean;
+}
 
-  const metaDescriptionEl = document.querySelector('meta[name=description]');
-  const problemStatement = metaDescriptionEl?.getAttribute('content') as string;
+interface SubmitMessage {
+  state: 'error' | 'success';
+  message: string;
+}
 
-  // Form states
+const ModelConfiguration: React.FC<ModelConfigurationProps> = ({
+  onConfigurationSaved,
+  onModelChange,
+  className = 'w-80',
+  showTitle = true,
+  autoLoad = true,
+}) => {
   const [selectedModel, setSelectedModel] = useState<ValidModel | ''>('');
   const [inputApiKey, setInputApiKey] = useState<string>('');
   const [isSelectInteracting, setIsSelectInteracting] =
     useState<boolean>(false);
   const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
 
-  // Status states
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [submitMessage, setSubmitMessage] = useState<{
-    state: 'error' | 'success';
-    message: string;
-  } | null>(null);
+  const [submitMessage, setSubmitMessage] = useState<SubmitMessage | null>(
+    null
+  );
 
-  const ref = useRef<HTMLDivElement>(null);
+  const [currentModel, setCurrentModel] = useState<ValidModel | null>(null);
+  const [currentApiKey, setCurrentApiKey] = useState<string | null>(null);
+
   const {
     setKeyModel,
     getKeyModel,
@@ -51,54 +57,9 @@ const ContentPage = () => {
     getSelectedModel,
   } = useChromeStorage();
 
-  const hasValidConfig = currentModel && currentApiKey;
-  const currentColors = colorPalettes[currentPalette][currentTheme];
-
-  useEffect(() => {
-    const loadThemeSettings = async () => {
-      try {
-        const result = await chrome.storage.sync.get([
-          'lifenode-palette',
-          'lifenode-theme',
-        ]);
-        if (
-          result['lifenode-palette'] &&
-          colorPalettes[result['lifenode-palette']]
-        ) {
-          setCurrentPalette(result['lifenode-palette']);
-        }
-        if (
-          result['lifenode-theme'] &&
-          ['light', 'dark'].includes(result['lifenode-theme'])
-        ) {
-          setCurrentTheme(result['lifenode-theme']);
-        }
-      } catch (error) {
-        console.error('Failed to load theme settings:', error);
-      }
-    };
-
-    loadThemeSettings();
-
-    const handleStorageChange = (changes: any, namespace: string) => {
-      if (namespace === 'sync') {
-        if (changes['lifenode-palette']) {
-          setCurrentPalette(changes['lifenode-palette'].newValue);
-        }
-        if (changes['lifenode-theme']) {
-          setCurrentTheme(changes['lifenode-theme'].newValue);
-        }
-      }
-    };
-
-    chrome.storage.onChanged.addListener(handleStorageChange);
-
-    return () => {
-      chrome.storage.onChanged.removeListener(handleStorageChange);
-    };
-  }, []);
-
   const loadStoredConfiguration = useCallback(async () => {
+    if (!autoLoad) return;
+
     try {
       const storedModel = await getSelectedModel();
       if (storedModel) {
@@ -116,13 +77,17 @@ const ContentPage = () => {
     } catch (error) {
       console.error('Failed to load stored configuration:', error);
     }
-  }, [getKeyModel, getSelectedModel]);
+  }, [getKeyModel, getSelectedModel, autoLoad]);
 
-  const handleModelChange = useCallback((value: ValidModel) => {
-    setSelectedModel(value);
-    setInputApiKey('');
-    setSubmitMessage(null);
-  }, []);
+  const handleModelChange = useCallback(
+    (value: ValidModel) => {
+      setSelectedModel(value);
+      setInputApiKey('');
+      setSubmitMessage(null);
+      onModelChange?.(value);
+    },
+    [onModelChange]
+  );
 
   const handleSaveConfiguration = async (
     e: React.FormEvent<HTMLFormElement>
@@ -142,11 +107,13 @@ const ContentPage = () => {
       setSubmitMessage(null);
 
       await setKeyModel(inputApiKey.trim(), selectedModel as ValidModel);
-
       await saveSelectedModel(selectedModel as ValidModel);
 
       setCurrentModel(selectedModel as ValidModel);
       setCurrentApiKey(inputApiKey.trim());
+
+      // Call the callback with the saved configuration
+      onConfigurationSaved?.(selectedModel as ValidModel, inputApiKey.trim());
 
       setSelectedModel('');
       setInputApiKey('');
@@ -170,64 +137,39 @@ const ContentPage = () => {
   };
 
   useEffect(() => {
-    const handleDocumentClick = (e: MouseEvent) => {
-      if (isSelectInteracting || isInputFocused) return;
-
-      if (!ref.current) return;
-      const target = e.target as HTMLElement;
-
-      // Don't close if clicked inside chatbox
-      if (ref.current.contains(target)) return;
-
-      // Don't close if clicked inside content-wrapper
-      const contentWrapper = document.getElementById('content-wrapper');
-      if (contentWrapper && contentWrapper.contains(target)) return;
-
-      // Don't close if it's input-related element
-      if (
-        target.closest('input') ||
-        target.closest('[role="combobox"]') ||
-        target.closest('[data-radix-popper-content-wrapper]') ||
-        target.closest('.autocomplete-dropdown')
-      ) {
-        return;
-      }
-
-      setChatboxExpanded(false);
-    };
-
-    if (chatboxExpanded) {
-      document.addEventListener('click', handleDocumentClick);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleDocumentClick);
-    };
-  }, [chatboxExpanded, isSelectInteracting, isInputFocused]);
-
-  useEffect(() => {
     loadStoredConfiguration();
   }, [loadStoredConfiguration]);
 
-  const renderConfigurationForm = () => (
+  const exposedProps = {
+    isSelectInteracting,
+    isInputFocused,
+    currentModel,
+    currentApiKey,
+    hasValidConfig: currentModel && currentApiKey,
+  };
+
+  return (
     <Card
-      className="w-80"
+      className={className}
       style={{
         backgroundColor: 'var(--surface)',
         borderColor: 'var(--border)',
         color: 'var(--text)',
       }}
+      {...exposedProps}
     >
-      <CardHeader>
-        <CardTitle
-          className="flex items-center gap-2"
-          style={{ color: 'var(--text)' }}
-        >
-          <Settings className="h-5 w-5" />
-          Configure AI Model
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      {showTitle && (
+        <CardHeader>
+          <CardTitle
+            className="flex items-center gap-2"
+            style={{ color: 'var(--text)' }}
+          >
+            <Settings className="h-5 w-5" />
+            Configure AI Model
+          </CardTitle>
+        </CardHeader>
+      )}
+      <CardContent className={!showTitle ? 'pt-6' : ''}>
         <form onSubmit={handleSaveConfiguration} className="space-y-4">
           <div className="space-y-2">
             <label
@@ -252,7 +194,7 @@ const ContentPage = () => {
               </SelectTrigger>
               <SelectContent
                 style={{
-                  // backgroundColor: 'var(--surface)',
+                  //   backgroundColor: 'var(--surface)',
                   borderColor: 'var(--border)',
                   color: 'var(--text)',
                 }}
@@ -342,56 +284,27 @@ const ContentPage = () => {
             </div>
           )}
         </form>
+
+        {currentModel && currentApiKey && (
+          <div
+            className="mt-4 p-3 rounded-md border text-sm"
+            style={{
+              backgroundColor: 'var(--background)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Check className="h-3 w-3 text-green-500" />
+              <span className="font-medium">Current Configuration</span>
+            </div>
+            <div>Model: {currentModel}</div>
+            <div>API Key: {'*'.repeat(8)}...</div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
-
-  const renderConfiguredState = () => (
-    <div className="space-y-3">
-      <ChatBox
-        visible={chatboxExpanded}
-        context={{ problemStatement }}
-        model={currentModel}
-        apiKey={currentApiKey}
-      />
-    </div>
-  );
-
-  return (
-    <ThemeContext theme={currentColors}>
-      <div
-        id="content-wrapper"
-        ref={ref}
-        className="z-50"
-        style={{
-          position: 'fixed',
-          bottom: '30px',
-          right: '30px',
-        }}
-      >
-        {chatboxExpanded && (
-          <div className="mb-4">
-            {hasValidConfig
-              ? renderConfiguredState()
-              : renderConfigurationForm()}
-          </div>
-        )}
-
-        <div className="flex justify-end">
-          <Button
-            size="icon"
-            onClick={() => setChatboxExpanded(!chatboxExpanded)}
-            style={{
-              backgroundColor: 'var(--primary)',
-              color: 'white',
-            }}
-          >
-            <Bot />
-          </Button>
-        </div>
-      </div>
-    </ThemeContext>
-  );
 };
 
-export default ContentPage;
+export default ModelConfiguration;

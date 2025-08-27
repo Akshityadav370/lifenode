@@ -4,11 +4,11 @@ import {
   GenerateResponseReturnType,
   ModelInterface,
 } from '../model-interface';
-import { VALID_MODELS } from '@/constants/valid_modal';
+import { VALID_MODELS } from '@/constants/valid_model';
 import { generateObjectResponse } from '../utils';
 
-export class GeminiAI_1_5_pro implements ModelInterface {
-  name = 'gemini_1.5_pro';
+export class GeminiAI_2_0_flash implements ModelInterface {
+  name = 'gemini_2.0_flash';
   private apiKey: string = '';
 
   init(apiKey: string) {

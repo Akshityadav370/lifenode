@@ -1,4 +1,5 @@
 import { dbPromise } from './db/indexedDB';
+import { ChatService } from './db/services/chat-service';
 
 function isWithinTimeWindow(fromTime, toTime) {
   if (!fromTime || !toTime) return true;
@@ -34,3 +35,56 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     priority: 2,
   });
 });
+
+// Chat service message proxy so all contexts share extension-origin IndexedDB
+chrome.runtime.onMessage.addListener(
+  (
+    request: {
+      type: 'chat:save' | 'chat:fetch' | 'chat:clear' | 'chat:list';
+      payload?: any;
+    },
+    _sender,
+    sendResponse
+  ) => {
+    (async () => {
+      try {
+        switch (request.type) {
+          case 'chat:save': {
+            const { problemName, history } = request.payload || {};
+            await ChatService.saveChatHistory(problemName, history);
+            sendResponse({ ok: true });
+            break;
+          }
+          case 'chat:fetch': {
+            const { problemName, limit, offset } = request.payload || {};
+            const data = await ChatService.fetchChatHistory(
+              problemName,
+              limit,
+              offset
+            );
+            sendResponse({ ok: true, data });
+            break;
+          }
+          case 'chat:clear': {
+            const { problemName } = request.payload || {};
+            await ChatService.clearChatHistory(problemName);
+            sendResponse({ ok: true });
+            break;
+          }
+          case 'chat:list': {
+            const list = await ChatService.fetchAllChats();
+            sendResponse({ ok: true, data: list });
+            break;
+          }
+          default: {
+            sendResponse({ ok: false, error: 'unknown_type' });
+          }
+        }
+      } catch (error: any) {
+        sendResponse({ ok: false, error: error?.message || 'unknown_error' });
+      }
+    })();
+
+    return true;
+  }
+);
