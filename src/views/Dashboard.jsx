@@ -125,6 +125,168 @@ const Dashboard = () => {
       )}
 
       <div className="flex gap-3 my-1">
+        <div className="flex-1 space-y-3">
+          {/* Reminders here */}
+          <div
+            className="flex-1 p-2 rounded-lg"
+            style={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            {/* Reminder header */}
+            <div className="flex items-center gap-2 mb-2">
+              <Bell className="w-4 h-4" style={{ color: 'var(--accent)' }} />
+              <h2
+                className="text-sm font-semibold"
+                style={{ color: 'var(--text)' }}
+              >
+                Active Reminders
+              </h2>
+              <span
+                className="px-1 py-1 text-sm font-medium"
+                style={{
+                  color: 'var(--text)',
+                }}
+              >
+                [{alarms.length}]
+              </span>
+            </div>
+
+            {/* Reminder Body */}
+            <div className="space-y-2 max-h-48 overflow-y-auto hide-scrollbar">
+              {alarms.length > 0 ? (
+                alarms.map((reminder) => (
+                  <div
+                    key={reminder.id}
+                    className="p-2 px-3 flex justify-between rounded-md border hover:opacity-80 transition-colors"
+                    style={{
+                      backgroundColor: 'var(--background)',
+                      borderColor: 'var(--border)',
+                    }}
+                  >
+                    <div className="flex flex-col justify-between mb-1">
+                      <span
+                        className="text-sm font-medium truncate"
+                        style={{ color: 'var(--text)' }}
+                      >
+                        {reminder.title}
+                      </span>
+                      {reminder.message && (
+                        <p
+                          className="text-xs mb-1"
+                          style={{ color: 'var(--textMuted)' }}
+                        >
+                          {reminder.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-center justify-between">
+                      {reminder.fromTime && reminder.toTime && (
+                        <span>
+                          {reminder.fromTime} to {reminder.toTime}
+                        </span>
+                      )}
+                      <span
+                        className="px-2 py-1 rounded-full text-xs"
+                        style={{
+                          backgroundColor: 'var(--accent)',
+                          color: 'var(--surface)',
+                        }}
+                      >
+                        Every {reminder.intervalMinutes}m
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <Bell
+                    className="w-6 h-6 mx-auto mb-2"
+                    style={{ color: 'var(--textMuted)' }}
+                  />
+                  <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
+                    No active reminders
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--textMuted)' }}>
+                    Set up reminders to stay on track!
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Chat history here */}
+          <div
+            className="p-4 rounded-lg"
+            style={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <MessageSquare
+                className="w-4 h-4"
+                style={{ color: 'var(--accent)' }}
+              />
+              <h2
+                className="text-sm font-semibold"
+                style={{ color: 'var(--text)' }}
+              >
+                Chat History
+              </h2>
+            </div>
+
+            <div className="space-y-2 max-h-48 overflow-y-auto hide-scrollbar">
+              {chats.length > 0 ? (
+                chats.map((chatName) => (
+                  <div
+                    key={chatName}
+                    className="flex items-center justify-between p-2 px-3 rounded-md border hover:opacity-80 transition-colors"
+                    style={{
+                      backgroundColor: 'var(--background)',
+                      borderColor: 'var(--border)',
+                    }}
+                  >
+                    <span
+                      className="text-xs truncate capitalize"
+                      style={{ color: 'var(--text)' }}
+                    >
+                      {chatName.split('-').join(' ')}
+                    </span>
+
+                    <button
+                      onClick={() => handleClearChat(chatName)}
+                      className="p-1 rounded transition-colors"
+                      title="Delete chat"
+                      style={{
+                        color: 'var(--error)',
+                        backgroundColor: 'var(--background)',
+                      }}
+                    >
+                      <Trash2 className="size-3" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <MessageSquare
+                    className="w-6 h-6 mx-auto mb-2"
+                    style={{ color: 'var(--textMuted)' }}
+                  />
+                  <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
+                    No chat history yet
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--textMuted)' }}>
+                    Start solving a problem to see it here!
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* Tasks here */}
         <div
           className="flex-1 p-2 rounded-lg"
           style={{
@@ -259,163 +421,6 @@ const Dashboard = () => {
               </div>
             )}
           </div>
-        </div>
-
-        {/* Reminders here */}
-        <div
-          className="flex-1 p-2 rounded-lg"
-          style={{
-            backgroundColor: 'var(--surface)',
-            border: '1px solid var(--border)',
-          }}
-        >
-          {/* Reminder header */}
-          <div className="flex items-center gap-2 mb-2">
-            <Bell className="w-4 h-4" style={{ color: 'var(--accent)' }} />
-            <h2
-              className="text-sm font-semibold"
-              style={{ color: 'var(--text)' }}
-            >
-              Active Reminders
-            </h2>
-            <span
-              className="px-1 py-1 text-sm font-medium"
-              style={{
-                color: 'var(--text)',
-              }}
-            >
-              [{alarms.length}]
-            </span>
-          </div>
-
-          {/* Reminder Body */}
-          <div className="space-y-2 max-h-48 overflow-y-auto hide-scrollbar">
-            {alarms.length > 0 ? (
-              alarms.map((reminder) => (
-                <div
-                  key={reminder.id}
-                  className="p-2 px-3 flex justify-between rounded-md border hover:opacity-80 transition-colors"
-                  style={{
-                    backgroundColor: 'var(--background)',
-                    borderColor: 'var(--border)',
-                  }}
-                >
-                  <div className="flex flex-col justify-between mb-1">
-                    <span
-                      className="text-sm font-medium truncate"
-                      style={{ color: 'var(--text)' }}
-                    >
-                      {reminder.title}
-                    </span>
-                    {reminder.message && (
-                      <p
-                        className="text-xs mb-1"
-                        style={{ color: 'var(--textMuted)' }}
-                      >
-                        {reminder.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col items-center justify-between">
-                    {reminder.fromTime && reminder.toTime && (
-                      <span>
-                        {reminder.fromTime} to {reminder.toTime}
-                      </span>
-                    )}
-                    <span
-                      className="px-2 py-1 rounded-full text-xs"
-                      style={{
-                        backgroundColor: 'var(--accent)',
-                        color: 'var(--surface)',
-                      }}
-                    >
-                      Every {reminder.intervalMinutes}m
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-6">
-                <Bell
-                  className="w-6 h-6 mx-auto mb-2"
-                  style={{ color: 'var(--textMuted)' }}
-                />
-                <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
-                  No active reminders
-                </p>
-                <p className="text-xs" style={{ color: 'var(--textMuted)' }}>
-                  Set up reminders to stay on track!
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Chat history here */}
-      <div
-        className="p-4 rounded-lg"
-        style={{
-          backgroundColor: 'var(--surface)',
-          border: '1px solid var(--border)',
-        }}
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquare
-            className="w-4 h-4"
-            style={{ color: 'var(--accent)' }}
-          />
-          <h2
-            className="text-sm font-semibold"
-            style={{ color: 'var(--text)' }}
-          >
-            Chat History
-          </h2>
-        </div>
-
-        <div className="space-y-2 max-h-48 overflow-y-auto hide-scrollbar">
-          {chats.length > 0 ? (
-            chats.map((chatName) => (
-              <div
-                key={chatName}
-                className="flex items-center justify-between p-2 px-3 rounded-md border hover:opacity-80 transition-colors"
-                style={{
-                  backgroundColor: 'var(--background)',
-                  borderColor: 'var(--border)',
-                }}
-              >
-                <span
-                  className="text-sm font-medium truncate"
-                  style={{ color: 'var(--text)' }}
-                >
-                  {chatName}
-                </span>
-
-                <button
-                  onClick={() => handleClearChat(chatName)}
-                  className="p-1 hover:bg-red-50 rounded transition-colors"
-                  title="Delete chat"
-                  style={{ color: 'var(--error)' }}
-                >
-                  <Trash2 className="size-3" />
-                </button>
-              </div>
-            ))
-          ) : (
-            <div className="text-center py-6">
-              <MessageSquare
-                className="w-6 h-6 mx-auto mb-2"
-                style={{ color: 'var(--textMuted)' }}
-              />
-              <p className="text-sm" style={{ color: 'var(--textMuted)' }}>
-                No chat history yet
-              </p>
-              <p className="text-xs" style={{ color: 'var(--textMuted)' }}>
-                Start solving a problem to see it here!
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

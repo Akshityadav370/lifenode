@@ -98,11 +98,8 @@ const RequestFeature = ({ onClose }: RequestFeatureProps) => {
           className="text-lg font-semibold mb-2"
           style={{ color: 'var(--text)' }}
         >
-          Request a Feature
+          Request a Feature / Message Me
         </h3>
-        <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
-          Have an idea to improve LifeNode? We'd love to hear from you!
-        </p>
       </div>
 
       {status === 'error' && (
@@ -139,7 +136,6 @@ const RequestFeature = ({ onClose }: RequestFeatureProps) => {
               backgroundColor: 'var(--surface)',
               borderColor: 'var(--border)',
               color: 'var(--text)',
-              //   '--tw-ring-color': 'var(--primary)',
             }}
             disabled={isLoading}
           />

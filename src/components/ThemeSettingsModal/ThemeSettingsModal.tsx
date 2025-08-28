@@ -13,7 +13,7 @@ const ThemeSettingsModal = ({
 
   return (
     <Card
-      className="h-80"
+      className="h-64"
       style={{
         backgroundColor: 'var(--surface)',
         borderColor: 'var(--border)',

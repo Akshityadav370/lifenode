@@ -40,7 +40,7 @@ const SettingsModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden"
+        className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden"
         style={{
           backgroundColor: 'var(--surface)',
           borderColor: 'var(--border)',
@@ -58,8 +58,11 @@ const SettingsModal = ({
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl font-bold"
-            style={{ color: 'var(--text-muted)' }}
+            className="text-md font-bold"
+            style={{
+              color: 'var(--text-muted)',
+              backgroundColor: 'var(--background)',
+            }}
           >
             ✕
           </button>
@@ -81,6 +84,7 @@ const SettingsModal = ({
                 style={{
                   color:
                     activeTab === tab.id ? 'var(--primary)' : 'var(--text)',
+                  backgroundColor: 'var(--background)',
                 }}
               >
                 <div className="flex items-center justify-center gap-1">
@@ -117,6 +121,22 @@ const SettingsModal = ({
           )}
 
           {activeTab === 'feature' && <RequestFeature onClose={onClose} />}
+        </div>
+        <div
+          className="px-4 py-2 border-t text-center"
+          style={{
+            borderColor: 'var(--border)',
+            backgroundColor: 'var(--background)',
+          }}
+        >
+          <p
+            className="text-xs flex items-center justify-center gap-1 opacity-70"
+            style={{ color: 'var(--textMuted)' }}
+          >
+            Crafted with
+            <span className="text-red-500 animate-pulse">❤️</span>
+            by Akshit Yadav
+          </p>
         </div>
       </div>
     </div>
